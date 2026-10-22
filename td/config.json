@@ -1,0 +1,144 @@
+{
+ "detector": {
+  "num_hands": 2,
+  "detection_confidence": 0.5,
+  "presence_confidence": 0.5,
+  "tracking_confidence": 0.5
+ },
+ "camera": {
+  "width": 1280,
+  "height": 720,
+  "fps": 60,
+  "mirror": true
+ },
+ "gates": {
+  "enable": true,
+  "min_score": 0.35,
+  "min_presence": 0.5,
+  "geometry": false,
+  "palm_w_frac": [
+   0.015,
+   0.45
+  ],
+  "finger_len_ratio": [
+   0.55,
+   2.3
+  ],
+  "thumb_len_ratio": [
+   0.9,
+   3.4
+  ],
+  "segment_ratio": [
+   0.12,
+   1.2
+  ],
+  "palm_len_ratio": [
+   0.85,
+   2.2
+  ],
+  "max_aspect": 5.0,
+  "min_inside_frac": 0.95,
+  "inside_margin": 0.01,
+  "temporal": true,
+  "acquire_n": 3,
+  "lose_m": 15,
+  "motion": true,
+  "vmax_px_s": 12000.0,
+  "maha_thresh": 16.0,
+  "jump_palm_frac": 0.25,
+  "self_intersect": false,
+  "person_mask": false,
+  "mask_min_frac": 0.3,
+  "mask_dilate": 10,
+  "mask_acquire_only": true
+ },
+ "kalman": {
+  "accel_sigma": 15000.0,
+  "meas_sigma": 4.0,
+  "coast_decay_s": 0.15
+ },
+ "identity": {
+  "enable": true,
+  "w_label": 0.6,
+  "w_appearance": 2.0,
+  "swap_margin": 0.6,
+  "swap_confirm": 4
+ },
+ "constraint": {
+  "enable": false,
+  "thumb_ratio": 0.45,
+  "index_ratio": 0.42,
+  "slack": 0.35,
+  "calibrate_frames": 0,
+  "anchor_spike": true,
+  "spike_palm_frac": 0.2,
+  "spike_persist": 3,
+  "spike_speed_gain": 1.0,
+  "spike_vel_gain": 0.9
+ },
+ "filter": {
+  "kind": "one_euro",
+  "min_cutoff": 0.7,
+  "beta": 0.3,
+  "d_cutoff": 6.0,
+  "ma_window": 3,
+  "speed_floor": 80.0,
+  "palm_speed_floor": 20.0,
+  "decompose": true,
+  "palm_min_cutoff": 1.0,
+  "palm_beta": 0.5,
+  "palm_d_cutoff": 15.0,
+  "vel_rel_deadband": 150.0,
+  "vel_cutoff": 8.0
+ },
+ "predict": {
+  "enable": true,
+  "extrap_max_periods": 1.5,
+  "tau_damp_s": 0.5,
+  "use_accel": true,
+  "accel_gain": 0.5,
+  "accel_deadband": 1500.0,
+  "vel_deadband": 20.0,
+  "blend_s": 0.03,
+  "reacq_s": 0.1,
+  "fade_out_s": 0.2,
+  "fade_in_s": 0.1
+ },
+ "quad": {
+  "min_area_frac": 0.0001,
+  "min_edge_px": 3.0,
+  "hold_frames": 12
+ },
+ "gesture": {
+  "enable": true,
+  "tau_open_s": 0.06,
+  "tau_twist_s": 0.15,
+  "spread_closed": 0.35,
+  "spread_open": 0.8,
+  "speed_ref": 0.6,
+  "dial_effects": [
+   "glass",
+   "moire",
+   "slitscan",
+   "pixelsort",
+   "crt",
+   "datamosh"
+  ],
+  "dial_step_deg": 20,
+  "dial_commit_s": 0.25,
+  "dial_base_tau_s": 6,
+  "dial_ease_s": 0.25,
+  "twist_depth": 0.25
+ },
+ "td": {
+  "repo": "D:\\TDMP\\portal",
+  "frame_divider": 2,
+  "frame_delay_s": 0.016666666666666666,
+  "camera_fps": 30,
+  "scene_fade_s": 0.3,
+  "parallax_pos": 0.06,
+  "parallax_tilt": 0.05,
+  "udp_port": 9000,
+  "quality_cell_px": 3.0
+ }
+}

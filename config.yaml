@@ -1,0 +1,102 @@
+# Every threshold / hyper-parameter. Defaults are the "starting values" from the spec unless a
+# sweep in REPORT.md says otherwise (see DECISIONS.md). Each feature has an `enable` switch so
+# tools/sweep.py can ablate it.
+detector:                   # MediaPipe Tasks HandLandmarker (sidecar only)
+  num_hands: 2
+  detection_confidence: 0.5
+  presence_confidence: 0.5
+  tracking_confidence: 0.5
+camera:
+  width: 1280
+  height: 720
+  fps: 60                   # requested; the real negotiated fps is reported by setup_check.py
+  mirror: true              # the ONE place mirroring is decided (applied in HandCore.ingest)
+gates:
+  enable: true              # master switch for 4.3 gates 1,2,4 (temporal gate 3 is `temporal`)
+  min_score: 0.35           # gate 1: hand score (the crop tracker keeps weak-but-coherent tracks alive through twists)
+  min_presence: 0.50
+  geometry: false           # gate 2 (bone proportions / palm size / aspect): OFF, it rejected real twisted + pinched hands (live trace)
+  palm_w_frac: [0.015, 0.45]     # 2D palm size / frame width
+  finger_len_ratio: [0.55, 2.3]  # (MCP->tip chain length) / palm width, non-thumb fingers
+  thumb_len_ratio: [0.9, 3.4]
+  segment_ratio: [0.12, 1.2]     # any single phalanx / palm width
+  palm_len_ratio: [0.85, 2.2]    # wrist->middle MCP / palm width
+  max_aspect: 5.0
+  min_inside_frac: 0.95     # fraction of the 21 landmarks that must be inside the frame
+  inside_margin: 0.01
+  temporal: true            # gate 3
+  acquire_n: 3
+  lose_m: 15                # frames a missing hand is bridged by prediction (0.5 s at 30 fps)
+  motion: true              # gate 4
+  vmax_px_s: 12000.0        # hard physical speed cap of the palm centre
+  jump_palm_frac: 0.25      # max deviation from the Kalman prediction, in palm sizes (+ accel allowance)
+  maha_thresh: 16.0         # squared Mahalanobis gate (2 dof) against the Kalman prediction
+  self_intersect: false     # palm-polygon self-intersection test: off (it rejected pinched / twisted real hands, measured on live frames)
+  person_mask: false        # gate 5 (needs Frame.person_mask): OFF - it blocked real hands for seconds at a time in live use; enable to suppress poster hands
+  mask_min_frac: 0.3
+  mask_dilate: 10           # cells of the 256x144 mask: hands at arm's length sit outside the raw body mask
+  mask_acquire_only: true   # a hand failing the mask test cannot start a track, but a tracked hand is never dropped by it
+kalman:
+  accel_sigma: 15000.0      # px/s^2 process noise (hands accelerate hard)
+  meas_sigma: 4.0           # px
+  coast_decay_s: 0.15       # velocity decay time-constant while coasting
+identity:
+  enable: true              # false => naive: sort detections by screen x
+  w_label: 0.6
+  w_appearance: 2.0
+  swap_margin: 0.6          # cost margin the alternative assignment must win by...
+  swap_confirm: 4           # ...for this many consecutive frames to be accepted
+constraint:
+  enable: false             # 4.5 kinematic tip constraint: OFF by default, no measurable gain in ablation (DECISIONS.md D9)
+  thumb_ratio: 0.45         # prior: IP->tip / palm width (measured on real MediaPipe output)
+  index_ratio: 0.42
+  slack: 0.35
+  calibrate_frames: 0       # >0: learn ratios from the first N valid frames (calibration pose)
+  anchor_spike: true        # raise filter strength when tip moves faster than palm anchors explain
+  spike_palm_frac: 0.2
+  spike_speed_gain: 1.0     # threshold grows by this x (offset speed x dt): fast steady motion is not a spike
+  spike_vel_gain: 0.9       # smoothing gain of the offset-velocity estimate used for prediction
+  spike_persist: 3          # frames a spike is held before it is accepted as real motion
+filter:
+  kind: one_euro            # one_euro | moving_average | none
+  min_cutoff: 0.7           # tip-offset-from-palm filter (see DECISIONS.md for the sweep behind these)
+  beta: 0.3
+  d_cutoff: 6.0
+  speed_floor: 80.0         # px/s dead-zone: derivative noise below it does not open the cutoff
+  palm_speed_floor: 20.0
+  ma_window: 3
+  decompose: true           # palm centre and tip-offset-from-palm are filtered separately
+  palm_min_cutoff: 1.0
+  palm_beta: 0.5
+  palm_d_cutoff: 15.0
+  vel_rel_deadband: 150.0   # px/s soft threshold on finger-relative velocity (noise, not motion)
+  vel_cutoff: 8.0           # Hz, low-pass on output velocity used for extrapolation
+predict:
+  enable: true              # 4.7 extrapolation at the render tick
+  extrap_max_periods: 1.5   # clamp, in camera frame periods
+  tau_damp_s: 0.5           # extrapolated velocity decays with this time constant
+  use_accel: true           # constant-acceleration term (damped) on top of velocity extrapolation
+  accel_gain: 0.5
+  accel_deadband: 1500.0    # px/s^2
+  vel_deadband: 20.0        # px/s: extrapolation fades out below this speed (kills rest jitter)
+  blend_s: 0.03             # error-decay time constant (~2-3 render frames)
+  reacq_s: 0.10             # ease-in time constant after re-acquisition
+  fade_out_s: 0.20
+  fade_in_s: 0.10
+quad:
+  min_area_frac: 0.0001     # of frame area (small boxes are valid: the portal grows out of a pinch)
+  min_edge_px: 3.0
+  hold_frames: 12           # hold last valid quad this long before fading
+gesture:                    # whole-hand pose drives the portal (no finger-raise logic, no key presses)
+  enable: true
+  tau_open_s: 0.06
+  tau_twist_s: 0.15
+  spread_closed: 0.35       # fingertip spread / palm size: pinched claw ...
+  spread_open: 0.80         # ... open hand (reference clip: pinch 0.2-0.4, open 0.8-1.2). Pinch = box closed, open hand = box open.
+  speed_ref: 0.6            # hand speed (frame widths per second) = "fast": full glitch / streak reactivity
+  dial_effects: [glass, moire, slitscan, pixelsort, crt, datamosh]   # twist RATCHET order (wraps around)
+  dial_step_deg: 20         # twist this far beyond your resting twist (and hold it) to step to the next effect; twist back = previous
+  dial_commit_s: 0.25       # hold time past the step before it commits (prevents accidental steps)
+  dial_base_tau_s: 6        # your resting twist follows slow drift with this time constant (the dial is relative, never needs edge-on angles)
+  dial_ease_s: 0.25         # cross-fade time between effects
+  twist_depth: 0.25         # each hand's twist pushes its side of the box deeper (the box twists in 3D)

@@ -1,0 +1,18 @@
+# environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# written at run time: hand-point coordinates of whoever used the app, and any recorded video
+logs/
+clips/
+*.mp4
+*.mov
+
+# model files are downloaded by tools/get_models.py (not stored in the repository)
+models/
+
+# frames of a third-party reference video were used for the effect previews: not redistributed
+fixtures/preview/new_*.png
+fixtures/preview/fast_*.png

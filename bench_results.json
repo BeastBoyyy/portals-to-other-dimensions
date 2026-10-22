@@ -1,0 +1,25 @@
+{
+ "machine": "this machine",
+ "n_frames": 240,
+ "IMAGE (blocking)": {
+  "mean_ms": 13.642776521733733,
+  "p95_ms": 24.39252000003761,
+  "fps": 73.29886247179539
+ },
+ "VIDEO (blocking)": {
+  "mean_ms": 16.004299565188177,
+  "p95_ms": 17.198229999985415,
+  "fps": 62.48320933551847
+ },
+ "LIVE_STREAM CPU, paced 30 fps": {
+  "mean_ms": 17.279290869567415,
+  "p95_ms": 18.88020500014136,
+  "fps": 57.87274533130392,
+  "delivered": 240,
+  "submitted": 240
+ },
+ "LIVE_STREAM GPU delegate": {
+  "error": "ValidatedGraphConfig Initialization failed.\nImageCloneCalculator: GPU processing is disabled in build flags\nImageCloneCa"
+ },
+ "Option A (Web Render TOP plugin)": "NOT MEASURED (runs only inside TouchDesigner)"
+}
